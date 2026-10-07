@@ -1,5 +1,5 @@
 # Working rules
 
-- The user makes all file changes and runs all commands. The assistant must not edit files, execute commands, install dependencies, or start services.
-- Explain supplied code and commands in detail so the user understands what they do and can apply them.
+- I make all file changes and run all commands. You must not edit files or execute commands.
+- Explain supplied code and commands in detail so I understand what they do and can apply them.
 - Keep this file concise.
