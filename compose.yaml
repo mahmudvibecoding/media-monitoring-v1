@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
 
     ports:
-      - "127.0.0.1:55432:5432"
+      - "127.0.0.1:55434:5432"
 
     volumes:
       - postgres_data:/var/lib/postgresql
@@ -34,6 +34,8 @@ services:
   importer:
     build: .
     profiles: ["tools"]
+    volumes:
+      - ./data:/data:ro
 
 volumes:
   postgres_data:
