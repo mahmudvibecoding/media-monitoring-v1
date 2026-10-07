@@ -1,7 +1,8 @@
 FROM golang:1.27.1-bookworm AS builder
 
 WORKDIR /src
-COPY go.mod ./
+COPY go.mod go.sum ./
+RUN go mod download
 COPY cmd ./cmd
 
 RUN CGO_ENABLED=0 go build -o /out/import-channels ./cmd/import-channels

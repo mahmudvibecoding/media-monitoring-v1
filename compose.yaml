@@ -36,6 +36,16 @@ services:
     profiles: ["tools"]
     volumes:
       - ./data:/data:ro
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGDATABASE: media_monitoring
+      PGUSER: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      PGSSLMODE: disable
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

@@ -9,6 +9,9 @@ import (
 	"strings"
 	"bufio"
 	"bytes"
+	"context"
+	"time"
+	"github.com/jackc/pgx/v5"
 )
 
 func main() {
@@ -89,5 +92,45 @@ func run() error {
 		"Data rows: %d\nUnique valid IDs: %d\nDuplicate valid IDs: %d\nInvalid IDs: %d\n",
 		rows, len(seen), duplicates, invalid,
 	)
+
+	if invalid > 0 {
+		return fmt.Errorf("found %d invalid IDs; nothing imported", invalid)
+	}
+
+	ids := make([]string, 0, len(seen))
+	for id := range seen {
+		ids = append(ids, id)
+	}
+
+	inserted, err := saveChannels(ids)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Inserted: %d\nAlready stored: %d\n",
+		inserted, int64(len(ids))-inserted)
+
 	return nil
+}
+
+func saveChannels(ids []string) (int64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+
+	conn, err := pgx.Connect(ctx, "")
+	if err != nil {
+		return 0, fmt.Errorf("connect to PostgreSQL: %w", err)
+	}
+	defer conn.Close(context.Background())
+
+	result, err := conn.Exec(ctx, `
+		INSERT INTO public.youtube_channels (channel_id)
+		SELECT unnest($1::text[])
+		ON CONFLICT (channel_id) DO NOTHING
+	`, ids)
+	if err != nil {
+		return 0, fmt.Errorf("insert channels: %w", err)
+	}
+
+	return result.RowsAffected(), nil
 }
